@@ -1,6 +1,9 @@
 package b.squared
 
+import android.bluetooth.BluetoothAdapter
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,6 +28,15 @@ class ConnectActivity : AppCompatActivity() {
         findViewById<RecyclerView>(R.id.rvPaired).apply{
             adapter = pairedAdapter
             layoutManager = LinearLayoutManager(ConnectActivity())
+        }
+
+        val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
+        if (bluetoothAdapter == null) {
+            Log.e("ERROR", "BLUETOOTH NOT SUPPORTED")
+        }
+        if (bluetoothAdapter?.isEnabled == false) {
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            startActivityForResult(enableBtIntent, 102)
         }
     }
 
