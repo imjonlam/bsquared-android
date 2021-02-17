@@ -6,11 +6,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class ConnectActivity : AppCompatActivity() {
+class ConnectActivity: AppCompatActivity(), PairedAdapter.OnItemClickListener {
 
     private lateinit var pairedAdapter: PairedAdapter
 
@@ -24,7 +25,7 @@ class ConnectActivity : AppCompatActivity() {
             setDisplayHomeAsUpEnabled(true)
         }
 
-        pairedAdapter = PairedAdapter(mutableListOf())
+        pairedAdapter = PairedAdapter(mutableListOf(), this)
 
         findViewById<RecyclerView>(R.id.rvPaired).apply{
             adapter = pairedAdapter
@@ -44,7 +45,6 @@ class ConnectActivity : AppCompatActivity() {
         pairedDevices?.forEach { device ->
             val newDevice = PairedDevice(device.name, device.address)
             pairedAdapter.addConnection(newDevice)
-            Log.i("DEBUG", pairedAdapter.itemCount.toString())
         }
 
     }
@@ -52,5 +52,9 @@ class ConnectActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
+    }
+
+    override fun onItemClick(device: PairedDevice) {
+        Toast.makeText(this, "${device.name}", Toast.LENGTH_SHORT).show()
     }
 }

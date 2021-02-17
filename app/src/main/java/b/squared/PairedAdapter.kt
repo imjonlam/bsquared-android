@@ -1,16 +1,28 @@
 package b.squared
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class PairedAdapter(private val items: MutableList<PairedDevice>) : RecyclerView.Adapter<PairedAdapter.ViewHolder>() {
+class PairedAdapter(private val items: MutableList<PairedDevice>,
+                    private val listener: OnItemClickListener
+):
+    RecyclerView.Adapter<PairedAdapter.ViewHolder>() {
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(view: View): RecyclerView.ViewHolder(view), View.OnClickListener{
         val textView: TextView = view.findViewById(R.id.tvDeviceName)
+
+        init {
+            view.setOnClickListener(this)
+        }
+
+        override fun onClick(v: View?) {
+            if (adapterPosition != RecyclerView.NO_POSITION) {
+                listener.onItemClick(items[adapterPosition])
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -25,7 +37,6 @@ class PairedAdapter(private val items: MutableList<PairedDevice>) : RecyclerView
 
     fun addConnection(device: PairedDevice) {
         items.add(device)
-        Log.i("DEBUG", device.name)
         notifyItemInserted(items.size - 1)
     }
 
@@ -35,5 +46,9 @@ class PairedAdapter(private val items: MutableList<PairedDevice>) : RecyclerView
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.textView.text = items[position].name
+    }
+
+    interface OnItemClickListener {
+        fun onItemClick(device: PairedDevice)
     }
 }
