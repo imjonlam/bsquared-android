@@ -1,5 +1,6 @@
 package b.squared
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,6 +25,7 @@ class PairedAdapter(private val items: MutableList<PairedDevice>) : RecyclerView
 
     fun addConnection(device: PairedDevice) {
         items.add(device)
+        Log.i("DEBUG", device.name)
         notifyItemInserted(items.size - 1)
     }
 

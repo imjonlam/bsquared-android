@@ -1,6 +1,7 @@
 package b.squared
 
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -38,6 +39,14 @@ class ConnectActivity : AppCompatActivity() {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             startActivityForResult(enableBtIntent, 102)
         }
+
+        val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
+        pairedDevices?.forEach { device ->
+            val newDevice = PairedDevice(device.name, device.address)
+            pairedAdapter.addConnection(newDevice)
+            Log.i("DEBUG", pairedAdapter.itemCount.toString())
+        }
+
     }
 
     override fun onSupportNavigateUp(): Boolean {
