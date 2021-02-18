@@ -2,7 +2,9 @@ package b.squared
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothSocket
 import android.content.Intent
+import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -10,6 +12,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.io.IOError
+import java.io.IOException
+import java.util.*
 
 class ConnectActivity: AppCompatActivity(), PairedAdapter.OnItemClickListener {
 
@@ -55,6 +60,38 @@ class ConnectActivity: AppCompatActivity(), PairedAdapter.OnItemClickListener {
     }
 
     override fun onItemClick(device: PairedDevice) {
-        Toast.makeText(this, "${device.name}", Toast.LENGTH_SHORT).show()
+        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        val device = bluetoothAdapter.getRemoteDevice(device.address)
+
+        ConnectThread(device).run()
+        Toast.makeText(this, "Connected to ${device.name}", Toast.LENGTH_SHORT).show()
+    }
+
+    private inner class ConnectThread(device: BluetoothDevice): Thread() {
+        val uuid: UUID = device?.uuids?.get(0)!!.uuid
+        private val mmSocket: BluetoothSocket? by lazy(LazyThreadSafetyMode.NONE) {
+            device.createRfcommSocketToServiceRecord(uuid)
+        }
+
+        public override fun run() {
+            val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+            bluetoothAdapter?.cancelDiscovery()
+
+            mmSocket?.use { socket ->
+                try {
+                    socket.connect()
+                } catch(e: IOException) {
+                    Log.e("ERROR", "Could not connect", e)
+                }
+            }
+        }
+
+        fun cancel() {
+            try {
+                mmSocket?.close()
+            } catch (e: IOException) {
+                Log.e("ERROR", "Could not close the client socket", e)
+            }
+        }
     }
 }
