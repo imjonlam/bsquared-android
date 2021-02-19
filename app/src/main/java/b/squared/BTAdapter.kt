@@ -6,10 +6,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class PairedAdapter(private val items: MutableList<PairedDevice>,
-                    private val listener: OnItemClickListener
+class BTAdapter(private val items: MutableList<BTDevice>,
+                private val listener: OnItemClickListener
 ):
-    RecyclerView.Adapter<PairedAdapter.ViewHolder>() {
+    RecyclerView.Adapter<BTAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view), View.OnClickListener{
         val textView: TextView = view.findViewById(R.id.tvDeviceName)
@@ -28,14 +28,14 @@ class PairedAdapter(private val items: MutableList<PairedDevice>,
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.paired_device,
+                R.layout.bt_device,
                 parent,
                 false
             )
         )
     }
 
-    fun addConnection(device: PairedDevice) {
+    fun addConnection(device: BTDevice) {
         items.add(device)
         notifyItemInserted(items.size - 1)
     }
@@ -49,6 +49,6 @@ class PairedAdapter(private val items: MutableList<PairedDevice>,
     }
 
     interface OnItemClickListener {
-        fun onItemClick(device: PairedDevice)
+        fun onItemClick(device: BTDevice)
     }
 }

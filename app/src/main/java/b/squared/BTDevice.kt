@@ -1,6 +1,6 @@
 package b.squared
 
-data class PairedDevice(
+data class BTDevice(
     val name: String,
     val address: String
 )

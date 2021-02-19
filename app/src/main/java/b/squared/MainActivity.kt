@@ -1,7 +1,7 @@
 package b.squared
 
 import android.Manifest
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -74,6 +74,17 @@ class MainActivity: AppCompatActivity() {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when(requestCode) {
+            Constants.REQUEST_CONNECT_DEVICE -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    Log.i("HELOOOOOOOO", "msg")
+                }
+            }
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
@@ -81,8 +92,8 @@ class MainActivity: AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_settings -> {
-            val intent = Intent(this, ConnectActivity::class.java)
-            startActivity(intent)
+            val intent = Intent(this, BTListActivity::class.java)
+            startActivityForResult(intent, Constants.REQUEST_CONNECT_DEVICE)
             true
         }
         else -> super.onOptionsItemSelected(item)
