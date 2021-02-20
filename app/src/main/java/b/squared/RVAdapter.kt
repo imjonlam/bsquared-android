@@ -6,10 +6,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class BTAdapter(private val items: MutableList<BTDevice>,
+class RVAdapter(private val items: MutableList<BTDevice>,
                 private val listener: OnItemClickListener
 ):
-    RecyclerView.Adapter<BTAdapter.ViewHolder>() {
+    RecyclerView.Adapter<RVAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view), View.OnClickListener{
         val textView: TextView = view.findViewById(R.id.tvDeviceName)
@@ -51,4 +51,5 @@ class BTAdapter(private val items: MutableList<BTDevice>,
     interface OnItemClickListener {
         fun onItemClick(device: BTDevice)
     }
+
 }

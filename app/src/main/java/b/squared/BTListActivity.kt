@@ -1,5 +1,6 @@
 package b.squared
 
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Intent
@@ -8,10 +9,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class BTListActivity: AppCompatActivity(), BTAdapter.OnItemClickListener {
+class BTListActivity: AppCompatActivity(), RVAdapter.OnItemClickListener {
     /* Setup */
-    private lateinit var pairedAdapter: BTAdapter
-    private lateinit var bluetoothAdapter: BluetoothAdapter
+    private lateinit var rvAdapter: RVAdapter
+    private lateinit var btAdapter: BluetoothAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,36 +20,31 @@ class BTListActivity: AppCompatActivity(), BTAdapter.OnItemClickListener {
         // setup window
         setContentView(R.layout.activity_btlist)
         setSupportActionBar(findViewById(R.id.tbConnect))
-
         supportActionBar?.apply {
             title = "Connect"
             setDisplayHomeAsUpEnabled(true)
         }
 
-        // initialize paired device adapter lists
-        pairedAdapter = BTAdapter(mutableListOf(), this)
-
         // create recycler view
+        rvAdapter = RVAdapter(mutableListOf(), this)
         findViewById<RecyclerView>(R.id.rvPaired).apply{
-            adapter = pairedAdapter
+            adapter = rvAdapter
             layoutManager = LinearLayoutManager(BTListActivity())
         }
 
-        // initialize local bluetooth adapter
-        // TODO: add check if bluetooth supported
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-
-        // enable bluetooth if OFF
-        if (!bluetoothAdapter.isEnabled) {
+        // start bluetooth adapter
+        btAdapter = BluetoothAdapter.getDefaultAdapter()
+        if (!btAdapter.isEnabled) {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            startActivityForResult(enableBtIntent, 102)
+            startActivityForResult(enableBtIntent, Constants.REQUEST_ENABLE_DEVICE)
         }
 
         // retrieve list of paired devices and add to recycler view
-        val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter.bondedDevices
-        pairedDevices?.forEach { device ->
-            val newDevice = BTDevice(device.name, device.address)
-            pairedAdapter.addConnection(newDevice)
+        val pairedDevices: Set<BluetoothDevice>? = btAdapter.bondedDevices
+        pairedDevices?.forEach {
+            if (it.address in Constants.VALID_ADDRESSES) {
+                rvAdapter.addConnection(BTDevice(it.name, it.address))
+            }
         }
     }
 
@@ -59,11 +55,11 @@ class BTListActivity: AppCompatActivity(), BTAdapter.OnItemClickListener {
     }
 
     /* Handling recycler view item clicks */
-    override fun onItemClick(selected: BTDevice) {
-        // attempt to connect with device
-        val btDevice = bluetoothAdapter.getRemoteDevice(selected.address)
-        val btService = BTService()
-        btService.connect(btDevice)
+    override fun onItemClick(btDevice: BTDevice) {
+        // return the device address to MainActivity
+        val returnDeviceIntent = Intent()
+        returnDeviceIntent.putExtra(Constants.MESSAGE_DEVICE_ADDRESS, btDevice.address)
+        setResult(Activity.RESULT_OK, returnDeviceIntent)
+        finish()
     }
-
 }

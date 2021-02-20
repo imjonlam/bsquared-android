@@ -1,41 +1,62 @@
 package b.squared
 
-import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
-import android.content.Intent
+import android.os.Bundle
 import android.os.Handler
-import android.os.Message
 import android.util.Log
-import java.io.IOException
-import java.io.InputStream
+import java.io.*
 import java.util.*
 
-class BTService() {
+class BTService(private val btHandler: Handler) {
     /* Setup */
     private var currState = Constants.STATE_NONE
     private val btAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+    private lateinit var worker: ServiceWorker
 
-    private lateinit var connectThread: ConnectThread
+    /* Start worker */
+    @Synchronized fun start(address: String) {
+        val btDevice: BluetoothDevice = btAdapter.getRemoteDevice(address)
 
-    /* Connect to given device */
-    @Synchronized fun connect(device: BluetoothDevice) {
-        connectThread = ConnectThread(device)
-        connectThread.start()
+        worker = ServiceWorker(btDevice)
+        worker.start()
     }
 
-    /* Process successful connection */
-    @Synchronized fun connected() {
-        // TODO: Null check and close threads
-
+    /* Stop worker */
+    @Synchronized fun stop() {
+        currState = Constants.STATE_NONE
+        worker.cancel() // todo: change to nullable
     }
 
-    private inner class ConnectThread(device: BluetoothDevice) : Thread() {
+    @Synchronized fun notifyStop(state: Int) {
+        // notify activity
+        val bundle = Bundle()
+        val message = btHandler.obtainMessage(Constants.HANDLER_STOP)
+
+        bundle.putString(Constants.MESSAGE_TOAST, when(state) {
+            Constants.STATE_FAILED -> "unable to connect with device"
+            Constants.STATE_LOST -> "lost connection to device"
+            else -> "bluetooth service has ended"
+        })
+        message.data = bundle
+        btHandler.sendMessage(message)
+    }
+
+    /* Stream data to activity */
+    @Synchronized fun stream(data: String) {
+        val bundle = Bundle()
+        val message = btHandler.obtainMessage(Constants.HANDLER_STREAM)
+        bundle.putString(Constants.MESSAGE_INCOMING, data)
+        message.data = bundle
+        btHandler.sendMessage(message)
+    }
+
+    private inner class ServiceWorker(btDevice: BluetoothDevice): Thread() {
         /* Setup */
-        private val uuid: UUID = device.uuids?.get(0)!!.uuid
+        private val uuid: UUID = UUID.fromString(Constants.UUID)
         private val btSocket: BluetoothSocket? by lazy(LazyThreadSafetyMode.NONE) {
-            device.createRfcommSocketToServiceRecord(uuid)
+            btDevice.createRfcommSocketToServiceRecord(uuid)
         }
 
         init {
@@ -43,10 +64,26 @@ class BTService() {
         }
 
         override fun run() {
-            btAdapter.cancelDiscovery()
+            try {
+                btSocket?.connect()
+                currState = Constants.STATE_CONNECTED
+            } catch (e: IOException) {
+                Log.e(Constants.TAG, "unable to connect to device, closing socket", e)
+                cancel()
+                notifyStop(Constants.STATE_FAILED)
+                return
+            }
 
-            btSocket?.use { socket ->
-                socket.connect()
+            val rx = btSocket?.inputStream
+            val reader = BufferedReader(InputStreamReader(rx!!))
+            try {
+                reader.forEachLine {
+                    stream(it)
+                }
+            } catch (e: IOException) {
+                Log.e(Constants.TAG, "lost connection, closing socket", e)
+                cancel()
+                notifyStop(Constants.STATE_LOST)
             }
         }
 
@@ -54,7 +91,7 @@ class BTService() {
             try {
                 btSocket?.close()
             } catch (e: IOException) {
-                Log.e(Constants.TAG, "Unable to close the client socket", e)
+                Log.e(Constants.TAG, "unable to close socket", e)
             }
         }
     }
