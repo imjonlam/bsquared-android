@@ -5,11 +5,15 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 
@@ -23,6 +27,38 @@ class MainActivity: AppCompatActivity() {
         setSupportActionBar(findViewById(R.id.tbMain))
 
         setupPermissions()
+
+        setGradient(R.id.tvFL)
+        setGradient(R.id.tvFR)
+        setGradient(R.id.tvRL)
+        setGradient(R.id.tvRR)
+    }
+
+    private fun setGradient(id: Int) {
+        val view: View = findViewById(id)
+        val gd = GradientDrawable(
+                GradientDrawable.Orientation.LEFT_RIGHT,
+                intArrayOf(Color.parseColor("#fafa6e"),
+                        Color.parseColor("#d9f271"),
+                        Color.parseColor("#b9e976"),
+                        Color.parseColor("#9cdf7c"),
+                        Color.parseColor("#7fd482"),
+                        Color.parseColor("#64c987"),
+                        Color.parseColor("#4abd8c"),
+                        Color.parseColor("#30b08e"),
+                        Color.parseColor("#14a38f"),
+                        Color.parseColor("#00968e"),
+                        Color.parseColor("#00898a"),
+                        Color.parseColor("#007b84"),
+                        Color.parseColor("#106e7c"),
+                        Color.parseColor("#1d6172"),
+                        Color.parseColor("#265466"),
+                        Color.parseColor("#2a4858")
+                )
+        )
+        gd.cornerRadius = 5f
+        view.background = gd
+
     }
 
     /* Create custom toolbar */
@@ -101,7 +137,7 @@ class MainActivity: AppCompatActivity() {
                     btService.stop()
                     Toast.makeText(this@MainActivity,
                             msg.data.getString(Constants.MESSAGE_TOAST),
-                            Toast.LENGTH_SHORT).show()
+                            Toast.LENGTH_LONG).show()
                 }
                 Constants.HANDLER_STREAM -> {
                     Toast.makeText(this@MainActivity,

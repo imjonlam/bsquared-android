@@ -76,7 +76,7 @@ class BTService(private val btHandler: Handler) {
 
             val rx = btSocket?.inputStream
             val reader = BufferedReader(InputStreamReader(rx!!))
-            try {
+            try { // todo: throws IOError on timeout (sleep)
                 reader.forEachLine {
                     stream(it)
                 }

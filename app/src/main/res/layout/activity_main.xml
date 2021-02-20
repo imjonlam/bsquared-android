@@ -17,12 +17,172 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:id="@+id/tvFR"
+        android:layout_width="100dp"
+        android:layout_height="130dp"
+        android:background="@drawable/tire_box"
+        android:gravity="center"
+        android:text="FR"
+        app:layout_constraintBottom_toTopOf="@+id/tvRR"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/tvFL"
+        app:layout_constraintTop_toBottomOf="@+id/tbMain" />
+
+    <TextView
+        android:id="@+id/tvRR"
+        android:layout_width="100dp"
+        android:layout_height="130dp"
+        android:background="@drawable/tire_box"
+        android:gravity="center"
+        android:text="RR"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/tvRL"
+        app:layout_constraintTop_toBottomOf="@+id/tvFR" />
+
+    <TextView
+        android:id="@+id/tvRL"
+        android:layout_width="100dp"
+        android:layout_height="130dp"
+        android:background="@drawable/tire_box"
+        android:gravity="center"
+        android:text="RL"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/tvFL"
+        app:layout_constraintEnd_toStartOf="@+id/tvRR"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvFL" />
+
+    <TextView
+        android:id="@+id/tvFL"
+        android:layout_width="100dp"
+        android:layout_height="130dp"
+        android:background="@drawable/tire_box"
+        android:gravity="center"
+        android:text="FL"
+        app:layout_constraintBottom_toTopOf="@+id/tvRL"
+        app:layout_constraintEnd_toStartOf="@+id/tvFR"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tbMain" />
+
+    <TextView
+        android:id="@+id/tvFLM"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="M"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/tvFL"
+        app:layout_constraintEnd_toStartOf="@+id/tvFLI"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/tvFLO" />
+
+    <TextView
+        android:id="@+id/tvFLI"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="I"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/tvFL"
+        app:layout_constraintEnd_toEndOf="@+id/tvFL" />
+
+    <TextView
+        android:id="@+id/tvFLO"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="O"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/tvFL"
+        app:layout_constraintStart_toStartOf="@+id/tvFL" />
+
+    <TextView
+        android:id="@+id/tvFRM"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="M"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/tvFR"
+        app:layout_constraintEnd_toStartOf="@+id/tvFRO"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/tvFRI" />
+
+    <TextView
+        android:id="@+id/tvFRO"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="O"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/tvFR"
+        app:layout_constraintEnd_toEndOf="@+id/tvFR" />
+
+    <TextView
+        android:id="@+id/tvFRI"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="I"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/tvFR"
+        app:layout_constraintStart_toStartOf="@+id/tvFR" />
+
+    <TextView
+        android:id="@+id/tvRRM"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="M"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/tvRR"
+        app:layout_constraintEnd_toStartOf="@+id/tvRRO"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/tvRRI" />
+
+    <TextView
+        android:id="@+id/tvRRO"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="O"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/tvRR"
+        app:layout_constraintEnd_toEndOf="@+id/tvRR" />
+
+    <TextView
+        android:id="@+id/tvRRI"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="I"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/tvRR"
+        app:layout_constraintStart_toStartOf="@+id/tvRR" />
+
+    <TextView
+        android:id="@+id/tvRLM"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="M"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/tvRL"
+        app:layout_constraintEnd_toStartOf="@+id/tvRLI"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/tvRLO" />
+
+    <TextView
+        android:id="@+id/tvRLI"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="I"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/tvRL"
+        app:layout_constraintEnd_toEndOf="@+id/tvRL" />
+
+    <TextView
+        android:id="@+id/tvRLO"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="O"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/tvRL"
+        app:layout_constraintStart_toStartOf="@+id/tvRL" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
