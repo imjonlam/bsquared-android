@@ -29,15 +29,23 @@ class BTService(private val btHandler: Handler) {
         worker.cancel() // todo: change to nullable
     }
 
+    @Synchronized fun notifyConnected() {
+        val bundle = Bundle()
+        val message = btHandler.obtainMessage(Constants.HANDLER_CONNECTED)
+        bundle.putString(Constants.MESSAGE_TOAST, "Connected")
+        message.data = bundle
+        btHandler.sendMessage(message)
+    }
+
     @Synchronized fun notifyStop(state: Int) {
         // notify activity
         val bundle = Bundle()
         val message = btHandler.obtainMessage(Constants.HANDLER_STOP)
 
         bundle.putString(Constants.MESSAGE_TOAST, when(state) {
-            Constants.STATE_FAILED -> "unable to connect with device"
-            Constants.STATE_LOST -> "lost connection to device"
-            else -> "bluetooth service has ended"
+            Constants.STATE_FAILED -> "Unable to connect with device"
+            Constants.STATE_LOST -> "Lost connection to device"
+            else -> "Bluetooth service has ended"
         })
         message.data = bundle
         btHandler.sendMessage(message)
@@ -67,6 +75,7 @@ class BTService(private val btHandler: Handler) {
             try {
                 btSocket?.connect()
                 currState = Constants.STATE_CONNECTED
+                notifyConnected()
             } catch (e: IOException) {
                 Log.e(Constants.TAG, "unable to connect to device, closing socket", e)
                 cancel()
@@ -78,7 +87,9 @@ class BTService(private val btHandler: Handler) {
             val reader = BufferedReader(InputStreamReader(rx!!))
             try { // todo: throws IOError on timeout (sleep)
                 reader.forEachLine {
-                    stream(it)
+                    if (it.split(",").size == Constants.EXPECTED_LENGTH) {
+                        stream(it) // todo: figure out bug where half the stream is read after reconnection
+                    }
                 }
             } catch (e: IOException) {
                 Log.e(Constants.TAG, "lost connection, closing socket", e)

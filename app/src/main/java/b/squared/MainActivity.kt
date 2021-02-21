@@ -14,8 +14,12 @@ import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import org.w3c.dom.Text
+import java.lang.NumberFormatException
+import kotlin.math.roundToInt
 
 class MainActivity: AppCompatActivity() {
     /* Setup */
@@ -27,38 +31,6 @@ class MainActivity: AppCompatActivity() {
         setSupportActionBar(findViewById(R.id.tbMain))
 
         setupPermissions()
-
-        setGradient(R.id.tvFL)
-        setGradient(R.id.tvFR)
-        setGradient(R.id.tvRL)
-        setGradient(R.id.tvRR)
-    }
-
-    private fun setGradient(id: Int) {
-        val view: View = findViewById(id)
-        val gd = GradientDrawable(
-                GradientDrawable.Orientation.LEFT_RIGHT,
-                intArrayOf(Color.parseColor("#fafa6e"),
-                        Color.parseColor("#d9f271"),
-                        Color.parseColor("#b9e976"),
-                        Color.parseColor("#9cdf7c"),
-                        Color.parseColor("#7fd482"),
-                        Color.parseColor("#64c987"),
-                        Color.parseColor("#4abd8c"),
-                        Color.parseColor("#30b08e"),
-                        Color.parseColor("#14a38f"),
-                        Color.parseColor("#00968e"),
-                        Color.parseColor("#00898a"),
-                        Color.parseColor("#007b84"),
-                        Color.parseColor("#106e7c"),
-                        Color.parseColor("#1d6172"),
-                        Color.parseColor("#265466"),
-                        Color.parseColor("#2a4858")
-                )
-        )
-        gd.cornerRadius = 5f
-        view.background = gd
-
     }
 
     /* Create custom toolbar */
@@ -139,12 +111,77 @@ class MainActivity: AppCompatActivity() {
                             msg.data.getString(Constants.MESSAGE_TOAST),
                             Toast.LENGTH_LONG).show()
                 }
-                Constants.HANDLER_STREAM -> {
+                Constants.HANDLER_CONNECTED -> {
                     Toast.makeText(this@MainActivity,
-                            msg.data.getString(Constants.MESSAGE_INCOMING),
+                            msg.data.getString(Constants.MESSAGE_TOAST),
                             Toast.LENGTH_SHORT).show()
+                }
+                Constants.HANDLER_STREAM -> {
+                    val stream = msg.data.getString(Constants.MESSAGE_INCOMING)
+                    stream?.let { getTemps(it) }
                 }
             }
         }
     }
-}  
+
+    /* Display tire temperatures */
+    private fun displayTemps(ids: HashMap<String, Int>, temps: List<Int>) {
+        val tireView: TextView = findViewById<TextView>(ids["tireID"]!!)
+        val innerView: TextView = findViewById<TextView>(ids["innerID"]!!)
+        val middleView: TextView = findViewById<TextView>(ids["middleID"]!!)
+        val outerView: TextView = findViewById<TextView>(ids["outerID"]!!)
+        val maxView: TextView = findViewById<TextView>(ids["maxID"]!!)
+        val minView: TextView = findViewById<TextView>(ids["minID"]!!)
+
+        maxView.text = temps.max().toString()
+        minView.text = temps.min().toString()
+        tireView.text = temps.average().roundToInt().toString()
+        innerView.text = temps.slice(0..4).average().roundToInt().toString()
+        middleView.text = temps.slice(5..10).average().roundToInt().toString()
+        outerView.text = temps.slice(11..15).average().roundToInt().toString()
+
+        val gradient = temps.map { temp ->
+            when(temp) {
+                in 0..25 -> Color.parseColor("#02FF00")
+                in 26..50 -> Color.parseColor("#A0D600")
+                in 51..75 -> Color.parseColor("#D7A600")
+                in 76..100 -> Color.parseColor("#F66D00")
+                in 101..125 -> Color.parseColor("#FF0000")
+                in 126..150 -> Color.parseColor("#FF0000")
+                in 151..175 -> Color.parseColor("#FF0000")
+                in 176..200 -> Color.parseColor("#FF0000")
+                else -> Color.parseColor("#000000")
+            }
+        }
+
+        val gd = GradientDrawable(
+                GradientDrawable.Orientation.LEFT_RIGHT,
+                gradient.toIntArray()
+        )
+        gd.cornerRadius = 5f
+        tireView.background = gd
+    }
+
+    /* Prepare tire temperature data */
+    private fun getTemps(message: String) {
+        val flIDSet = hashMapOf("tireID" to R.id.tvFL, "innerID" to R.id.tvFLI,
+                "middleID" to R.id.tvFLM, "outerID" to R.id.tvFLO,
+                "maxID" to R.id.tvFLMax, "minID" to R.id.tvFLMin)
+        val frIDSet = hashMapOf("tireID" to R.id.tvFR, "innerID" to R.id.tvFRI,
+                "middleID" to R.id.tvFRM, "outerID" to R.id.tvFRO,
+                "maxID" to R.id.tvFRMax, "minID" to R.id.tvFRMin)
+        val rlIDSet = hashMapOf("tireID" to R.id.tvRL, "innerID" to R.id.tvRLI,
+                "middleID" to R.id.tvRLM, "outerID" to R.id.tvRLO,
+                "maxID" to R.id.tvRLMax, "minID" to R.id.tvRLMin)
+        val rrIDSet = hashMapOf("tireID" to R.id.tvRR, "innerID" to R.id.tvRRI,
+                "middleID" to R.id.tvRRM, "outerID" to R.id.tvRRO,
+                "maxID" to R.id.tvRRMax, "minID" to R.id.tvRRMin)
+
+
+        val temps = message.split(",").map { it.toInt() }
+        displayTemps(flIDSet, temps.slice(0..15))
+        displayTemps(frIDSet, temps.slice(16..31))
+        displayTemps(rlIDSet, temps.slice(32..47))
+        displayTemps(rrIDSet, temps.slice(48..63))
+    }
+}

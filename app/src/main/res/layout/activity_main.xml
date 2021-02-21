@@ -23,6 +23,8 @@
         android:background="@drawable/tire_box"
         android:gravity="center"
         android:text="FR"
+        android:textColor="@color/white"
+        android:textSize="30sp"
         app:layout_constraintBottom_toTopOf="@+id/tvRR"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -36,6 +38,8 @@
         android:background="@drawable/tire_box"
         android:gravity="center"
         android:text="RR"
+        android:textColor="@color/white"
+        android:textSize="30sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -49,6 +53,8 @@
         android:background="@drawable/tire_box"
         android:gravity="center"
         android:text="RL"
+        android:textColor="@color/white"
+        android:textSize="30sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/tvFL"
         app:layout_constraintEnd_toStartOf="@+id/tvRR"
@@ -63,6 +69,8 @@
         android:background="@drawable/tire_box"
         android:gravity="center"
         android:text="FL"
+        android:textColor="@color/white"
+        android:textSize="30sp"
         app:layout_constraintBottom_toTopOf="@+id/tvRL"
         app:layout_constraintEnd_toStartOf="@+id/tvFR"
         app:layout_constraintHorizontal_bias="0.5"
@@ -184,5 +192,79 @@
         android:textAlignment="center"
         app:layout_constraintBottom_toTopOf="@+id/tvRL"
         app:layout_constraintStart_toStartOf="@+id/tvRL" />
+
+    <TextView
+        android:id="@+id/tvFLMax"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="MAX"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toStartOf="@+id/tvFL"
+        app:layout_constraintTop_toTopOf="@+id/tvFL" />
+
+    <TextView
+        android:id="@+id/tvFLMin"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="MIN"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="@+id/tvFL"
+        app:layout_constraintEnd_toStartOf="@+id/tvFL" />
+
+    <TextView
+        android:id="@+id/tvRLMax"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="MAX"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toStartOf="@+id/tvRL"
+        app:layout_constraintTop_toTopOf="@+id/tvRL" />
+
+    <TextView
+        android:id="@+id/tvRLMin"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="MIN"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="@+id/tvRL"
+        app:layout_constraintEnd_toStartOf="@+id/tvRL" />
+
+    <TextView
+        android:id="@+id/tvFRMax"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="MAX"
+        android:textAlignment="center"
+        app:layout_constraintStart_toEndOf="@+id/tvFR"
+        app:layout_constraintTop_toTopOf="@+id/tvFR" />
+
+    <TextView
+        android:id="@+id/tvFRMin"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="MIN"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="@+id/tvFR"
+        app:layout_constraintStart_toEndOf="@+id/tvFR" />
+
+    <TextView
+        android:id="@+id/tvRRMax"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="MAX"
+        android:textAlignment="center"
+        app:layout_constraintStart_toEndOf="@+id/tvRR"
+        app:layout_constraintTop_toTopOf="@+id/tvRR" />
+
+    <TextView
+        android:id="@+id/tvRRMin"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:text="MIN"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="@+id/tvRR"
+        app:layout_constraintStart_toEndOf="@+id/tvRR" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

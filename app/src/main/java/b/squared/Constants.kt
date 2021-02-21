@@ -21,13 +21,15 @@ object Constants {
     // Bluetooth Device Attributes
     const val UUID = "00001101-0000-1000-8000-00805F9B34FB"
     val VALID_ADDRESSES = arrayOf("00:14:03:05:0B:A6")
+    const val EXPECTED_LENGTH = 64
 
     // Intents
     const val MESSAGE_DEVICE_ADDRESS = "device_address"
 
     // Bundles
     const val HANDLER_STOP = 0
-    const val HANDLER_STREAM = 1
+    const val HANDLER_CONNECTED = 1
+    const val HANDLER_STREAM = 2
     const val MESSAGE_TOAST = "toast_message"
     const val MESSAGE_INCOMING = "incoming_message"
 }
