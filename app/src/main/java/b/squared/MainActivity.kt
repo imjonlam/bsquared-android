@@ -142,14 +142,14 @@ class MainActivity: AppCompatActivity() {
 
         val gradient = temps.map { temp ->
             when(temp) {
-                in 0..25 -> Color.parseColor("#02FF00")
-                in 26..50 -> Color.parseColor("#A0D600")
-                in 51..75 -> Color.parseColor("#D7A600")
-                in 76..100 -> Color.parseColor("#F66D00")
-                in 101..125 -> Color.parseColor("#FF0000")
-                in 126..150 -> Color.parseColor("#FF0000")
-                in 151..175 -> Color.parseColor("#FF0000")
-                in 176..200 -> Color.parseColor("#FF0000")
+                in 0..25 -> Color.parseColor("#00ff11")
+                in 26..50 -> Color.parseColor("#7ce800")
+                in 51..75 -> Color.parseColor("#a9d000")
+                in 76..100 -> Color.parseColor("#c9b500")
+                in 101..125 -> Color.parseColor("#e19800")
+                in 126..150 -> Color.parseColor("#f27700")
+                in 151..175 -> Color.parseColor("#fc4f00")
+                in 176..200 -> Color.parseColor("#ff0000")
                 else -> Color.parseColor("#000000")
             }
         }
