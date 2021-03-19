@@ -15,7 +15,9 @@ class BTService(private val btHandler: Handler) {
     private val btAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
     private lateinit var worker: ServiceWorker
 
-    /* Start worker */
+    /**
+     * Start service worker for given bluetooth device address
+     */
     @Synchronized fun start(address: String) {
         val btDevice: BluetoothDevice = btAdapter.getRemoteDevice(address)
 
@@ -23,12 +25,17 @@ class BTService(private val btHandler: Handler) {
         worker.start()
     }
 
-    /* Stop worker */
+    /**
+     * Stop service worker
+     */
     @Synchronized fun stop() {
         currState = Constants.STATE_NONE
-        worker.cancel() // todo: change to nullable
+        worker.cancel()
     }
 
+    /**
+     * Notify user that the device is connected
+     */
     @Synchronized fun notifyConnected() {
         val bundle = Bundle()
         val message = btHandler.obtainMessage(Constants.HANDLER_CONNECTED)
@@ -37,7 +44,13 @@ class BTService(private val btHandler: Handler) {
         btHandler.sendMessage(message)
     }
 
+    /**
+     * Notify user that the device has stopped
+     */
     @Synchronized fun notifyStop(state: Int) {
+        // stop worker
+        worker.cancel()
+
         // notify activity
         val bundle = Bundle()
         val message = btHandler.obtainMessage(Constants.HANDLER_STOP)
@@ -51,7 +64,9 @@ class BTService(private val btHandler: Handler) {
         btHandler.sendMessage(message)
     }
 
-    /* Stream data to activity */
+    /**
+     * Stream received data to main activity
+     */
     @Synchronized fun stream(data: String) {
         val bundle = Bundle()
         val message = btHandler.obtainMessage(Constants.HANDLER_STREAM)
@@ -66,6 +81,7 @@ class BTService(private val btHandler: Handler) {
         private val btSocket: BluetoothSocket? by lazy(LazyThreadSafetyMode.NONE) {
             btDevice.createRfcommSocketToServiceRecord(uuid)
         }
+        private lateinit var reader: BufferedReader
 
         init {
             currState = Constants.STATE_CONNECTING
@@ -78,29 +94,30 @@ class BTService(private val btHandler: Handler) {
                 notifyConnected()
             } catch (e: IOException) {
                 Log.e(Constants.TAG, "unable to connect to device, closing socket", e)
-                cancel()
                 notifyStop(Constants.STATE_FAILED)
                 return
             }
 
+            // get input stream and read in data
             val rx = btSocket?.inputStream
-            val reader = BufferedReader(InputStreamReader(rx!!))
-            try { // todo: throws IOError on timeout (sleep)
+            reader = BufferedReader(InputStreamReader(rx!!))
+            try {
                 reader.forEachLine {
-                    if (it.split(",").size == Constants.EXPECTED_LENGTH) {
-                        stream(it) // todo: figure out bug where half the stream is read after reconnection
-                    }
+                    stream(it)
                 }
             } catch (e: IOException) {
                 Log.e(Constants.TAG, "lost connection, closing socket", e)
-                cancel()
                 notifyStop(Constants.STATE_LOST)
             }
         }
 
+        /**
+         * Stops the thread and closes open bluetooth socket, StreamReaders
+         */
         fun cancel() {
             try {
                 btSocket?.close()
+                reader.close()
             } catch (e: IOException) {
                 Log.e(Constants.TAG, "unable to close socket", e)
             }

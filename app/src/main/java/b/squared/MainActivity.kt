@@ -10,20 +10,16 @@ import android.graphics.drawable.GradientDrawable
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
-import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import org.w3c.dom.Text
-import java.lang.NumberFormatException
 import kotlin.math.roundToInt
 
 class MainActivity: AppCompatActivity() {
     /* Setup */
-    private lateinit var btService: BTService
+    private var btService: BTService? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,13 +29,25 @@ class MainActivity: AppCompatActivity() {
         setupPermissions()
     }
 
-    /* Create custom toolbar */
+    /**
+     * Stop the bluetooth service
+     */
+    override fun onDestroy() {
+        super.onDestroy()
+        btService?.stop()
+    }
+
+    /**
+     * Creates a custom toolbar
+     */
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
 
-    /* Request permissions at runtime */
+    /**
+     * Request permissions at runtime
+     */
     private fun setupPermissions() {
         val perms: Array<String> = arrayOf(
             Manifest.permission.BLUETOOTH,
@@ -56,8 +64,10 @@ class MainActivity: AppCompatActivity() {
         }
     }
 
-    // TODO: add rejection handling
-    /* Check if certain permissions were rejected */
+    /**
+     * Check if any required permissions were granted/denied
+     * TODO: add rejection handling
+     */
     override fun onRequestPermissionsResult(requestCode: Int,
         permissions: Array<out String>, grantResults: IntArray) {
         when(requestCode) {
@@ -73,7 +83,9 @@ class MainActivity: AppCompatActivity() {
         }
     }
 
-    /* Handle custom toolbar items */
+    /**
+     * Handle custom toolbar menu options
+     */
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_settings -> {
             val getDeviceIntent = Intent(this, BTListActivity::class.java)
@@ -83,7 +95,9 @@ class MainActivity: AppCompatActivity() {
         else -> super.onOptionsItemSelected(item)
     }
 
-    /* Handle intent responses */
+    /**
+     * Handle intent responses such as starting a new bluetooth service
+     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when(requestCode) {
@@ -93,7 +107,7 @@ class MainActivity: AppCompatActivity() {
                     val address = data?.extras?.getString(Constants.MESSAGE_DEVICE_ADDRESS)
                     address?.let {
                         btService = BTService(btHandler)
-                        btService.start(it)
+                        btService?.start(it)
                     }
                 }
             }
@@ -105,17 +119,20 @@ class MainActivity: AppCompatActivity() {
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
             when(msg.what) {
+                // notify user bluetooth service has stopped
                 Constants.HANDLER_STOP -> {
-                    btService.stop()
+                    btService?.stop()
                     Toast.makeText(this@MainActivity,
                             msg.data.getString(Constants.MESSAGE_TOAST),
                             Toast.LENGTH_LONG).show()
                 }
+                // notify user bluetooth service has connected
                 Constants.HANDLER_CONNECTED -> {
                     Toast.makeText(this@MainActivity,
                             msg.data.getString(Constants.MESSAGE_TOAST),
                             Toast.LENGTH_SHORT).show()
                 }
+                // stream data from Arduino
                 Constants.HANDLER_STREAM -> {
                     val stream = msg.data.getString(Constants.MESSAGE_INCOMING)
                     stream?.let { getTemps(it) }
@@ -124,8 +141,11 @@ class MainActivity: AppCompatActivity() {
         }
     }
 
-    /* Display tire temperatures */
+    /**
+     * Display on screen the parsed tire temperatures
+     */
     private fun displayTemps(ids: HashMap<String, Int>, temps: List<Int>) {
+        // get all required layout items
         val tireView: TextView = findViewById<TextView>(ids["tireID"]!!)
         val innerView: TextView = findViewById<TextView>(ids["innerID"]!!)
         val middleView: TextView = findViewById<TextView>(ids["middleID"]!!)
@@ -133,6 +153,7 @@ class MainActivity: AppCompatActivity() {
         val maxView: TextView = findViewById<TextView>(ids["maxID"]!!)
         val minView: TextView = findViewById<TextView>(ids["minID"]!!)
 
+        // set values
         maxView.text = temps.max().toString()
         minView.text = temps.min().toString()
         tireView.text = temps.average().roundToInt().toString()
@@ -140,20 +161,17 @@ class MainActivity: AppCompatActivity() {
         middleView.text = temps.slice(5..10).average().roundToInt().toString()
         outerView.text = temps.slice(11..15).average().roundToInt().toString()
 
+        // apply colours
         val gradient = temps.map { temp ->
             when(temp) {
-                in 0..25 -> Color.parseColor("#00ff11")
-                in 26..50 -> Color.parseColor("#7ce800")
-                in 51..75 -> Color.parseColor("#a9d000")
-                in 76..100 -> Color.parseColor("#c9b500")
-                in 101..125 -> Color.parseColor("#e19800")
-                in 126..150 -> Color.parseColor("#f27700")
-                in 151..175 -> Color.parseColor("#fc4f00")
-                in 176..200 -> Color.parseColor("#ff0000")
+                in -50..69 -> Color.parseColor("#007B13")
+                in 70..99 -> Color.parseColor("#907100")
+                in 100..200 -> Color.parseColor("#FF0000")
                 else -> Color.parseColor("#000000")
             }
         }
 
+        // display the colour gradients
         val gd = GradientDrawable(
                 GradientDrawable.Orientation.LEFT_RIGHT,
                 gradient.toIntArray()
@@ -162,8 +180,11 @@ class MainActivity: AppCompatActivity() {
         tireView.background = gd
     }
 
-    /* Prepare tire temperature data */
+    /**
+     * Parse the streamed tire temperature data
+     */
     private fun getTemps(message: String) {
+        // setup associated layout item IDs
         val flIDSet = hashMapOf("tireID" to R.id.tvFL, "innerID" to R.id.tvFLI,
                 "middleID" to R.id.tvFLM, "outerID" to R.id.tvFLO,
                 "maxID" to R.id.tvFLMax, "minID" to R.id.tvFLMin)
@@ -177,8 +198,14 @@ class MainActivity: AppCompatActivity() {
                 "middleID" to R.id.tvRRM, "outerID" to R.id.tvRRO,
                 "maxID" to R.id.tvRRMax, "minID" to R.id.tvRRMin)
 
+        // convert streamed data from string to an array of integers
+        val padding = List(64){999}
+        val data = message.replace("^,|,$".toRegex(), "")
+                .split(",")
+                .map { it.toInt() }
+        val temps = (data + padding).slice(0..63)
 
-        val temps = message.split(",").map { it.toInt() }
+        // display each corner's information onto the screen
         displayTemps(flIDSet, temps.slice(0..15))
         displayTemps(frIDSet, temps.slice(16..31))
         displayTemps(rlIDSet, temps.slice(32..47))

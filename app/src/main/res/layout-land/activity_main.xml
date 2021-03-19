@@ -18,8 +18,8 @@
 
     <TextView
         android:id="@+id/tvFR"
-        android:layout_width="130dp"
-        android:layout_height="150dp"
+        android:layout_width="200dp"
+        android:layout_height="115dp"
         android:background="@drawable/tire_box"
         android:gravity="center"
         android:text="FR"
@@ -33,8 +33,8 @@
 
     <TextView
         android:id="@+id/tvRR"
-        android:layout_width="130dp"
-        android:layout_height="150dp"
+        android:layout_width="200dp"
+        android:layout_height="115dp"
         android:background="@drawable/tire_box"
         android:gravity="center"
         android:text="RR"
@@ -48,8 +48,8 @@
 
     <TextView
         android:id="@+id/tvRL"
-        android:layout_width="130dp"
-        android:layout_height="150dp"
+        android:layout_width="200dp"
+        android:layout_height="115dp"
         android:background="@drawable/tire_box"
         android:gravity="center"
         android:text="RL"
@@ -64,8 +64,8 @@
 
     <TextView
         android:id="@+id/tvFL"
-        android:layout_width="130dp"
-        android:layout_height="150dp"
+        android:layout_width="200dp"
+        android:layout_height="115dp"
         android:background="@drawable/tire_box"
         android:gravity="center"
         android:text="FL"
@@ -264,7 +264,6 @@
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="@+id/tvRR"
         app:layout_constraintStart_toEndOf="@+id/tvRR" />
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

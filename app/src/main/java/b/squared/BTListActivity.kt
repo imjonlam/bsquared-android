@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -39,28 +40,47 @@ class BTListActivity: AppCompatActivity(), RVAdapter.OnItemClickListener {
             startActivityForResult(enableBtIntent, Constants.REQUEST_ENABLE_DEVICE)
         }
 
-        // retrieve list of paired devices and add to recycler view
-        val pairedDevices: Set<BluetoothDevice>? = btAdapter.bondedDevices
-        pairedDevices?.forEach {
-            rvAdapter.addConnection(BTDevice(it.name, it.address))
-//            if (it.address in Constants.VALID_ADDRESSES) {
-//                rvAdapter.addConnection(BTDevice(it.name, it.address))
-//            }
-        }
+        // get paired bluetooth device list
+        showDevices()
     }
 
-    /* Return to previous activity */
+    /**
+     * Update bluetooth device list on restart
+     */
+    override fun onRestart() {
+        super.onRestart()
+        showDevices()
+    }
+
+    /**
+     * Return to previous activity
+     */
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
     }
 
-    /* Handling recycler view item clicks */
+    /**
+     * Handles recycler view item clicks
+     */
     override fun onItemClick(btDevice: BTDevice) {
         // return the device address to MainActivity
         val returnDeviceIntent = Intent()
         returnDeviceIntent.putExtra(Constants.MESSAGE_DEVICE_ADDRESS, btDevice.address)
         setResult(Activity.RESULT_OK, returnDeviceIntent)
         finish()
+    }
+
+    /**
+     * Retrieve list of paired devices and add to RecyclerView
+     */
+    fun showDevices() {
+        // retrieve list of paired devices and add to recycler view
+        val pairedDevices: Set<BluetoothDevice>? = btAdapter.bondedDevices
+        pairedDevices?.forEach {
+            if (it.address in Constants.VALID_ADDRESSES) {
+                rvAdapter.addConnection(BTDevice(it.name, it.address))
+            }
+        }
     }
 }

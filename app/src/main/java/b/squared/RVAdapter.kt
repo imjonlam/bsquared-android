@@ -35,19 +35,31 @@ class RVAdapter(private val items: MutableList<BTDevice>,
         )
     }
 
+    /**
+     * Adds a new device to the list of paired devices
+     */
     fun addConnection(device: BTDevice) {
         items.add(device)
         notifyItemInserted(items.size - 1)
     }
 
+    /**
+     * Returns the number of items in the list
+     */
     override fun getItemCount(): Int {
         return items.size
     }
 
+    /**
+     * Display the name of the device in the ViewHolder
+     */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.textView.text = items[position].name
     }
 
+    /**
+     * Proposes an onclick function to each item in the list
+     */
     interface OnItemClickListener {
         fun onItemClick(device: BTDevice)
     }
