@@ -52,8 +52,7 @@ class MainActivity: AppCompatActivity() {
     private fun setupPermissions() {
         val perms: Array<String> = arrayOf(
             Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.ACCESS_COARSE_LOCATION
+            Manifest.permission.BLUETOOTH_ADMIN
         )
 
         fun hasPermissions(context: Context, vararg permissions: String): Boolean = permissions.all {
