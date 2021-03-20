@@ -13,7 +13,7 @@ class BTService(private val btHandler: Handler) {
     /* Setup */
     private var currState = Constants.STATE_NONE
     private val btAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-    private lateinit var worker: ServiceWorker
+    private var worker: ServiceWorker? = null
 
     /**
      * Start service worker for given bluetooth device address
@@ -22,7 +22,7 @@ class BTService(private val btHandler: Handler) {
         val btDevice: BluetoothDevice = btAdapter.getRemoteDevice(address)
 
         worker = ServiceWorker(btDevice)
-        worker.start()
+        worker!!.start()
     }
 
     /**
@@ -30,36 +30,33 @@ class BTService(private val btHandler: Handler) {
      */
     @Synchronized fun stop() {
         currState = Constants.STATE_NONE
-        worker.cancel()
+        worker?.cancel()
+        worker = null
     }
 
     /**
-     * Notify user that the device is connected
+     * Returns the address of connected device
      */
-    @Synchronized fun notifyConnected() {
-        val bundle = Bundle()
-        val message = btHandler.obtainMessage(Constants.HANDLER_CONNECTED)
-        bundle.putString(Constants.MESSAGE_TOAST, "Connected")
-        message.data = bundle
-        btHandler.sendMessage(message)
+    @Synchronized fun getAddress(): String? {
+        return worker?.getAddress()
     }
 
     /**
-     * Notify user that the device has stopped
+     * Sends notification to main activity
      */
-    @Synchronized fun notifyStop(state: Int) {
-        // stop worker
-        worker.cancel()
-
-        // notify activity
+    @Synchronized private fun notifyActivity(state: Int, handler: Int) {
         val bundle = Bundle()
-        val message = btHandler.obtainMessage(Constants.HANDLER_STOP)
+        val message = btHandler.obtainMessage(handler)
 
         bundle.putString(Constants.MESSAGE_TOAST, when(state) {
+            Constants.STATE_CONNECTING -> "Connecting"
+            Constants.STATE_CONNECTED -> "Connected"
             Constants.STATE_FAILED -> "Unable to connect with device"
             Constants.STATE_LOST -> "Lost connection to device"
+            Constants.STATE_CLOSED -> "Connection closed"
             else -> "Bluetooth service has ended"
         })
+
         message.data = bundle
         btHandler.sendMessage(message)
     }
@@ -81,46 +78,67 @@ class BTService(private val btHandler: Handler) {
         private val btSocket: BluetoothSocket? by lazy(LazyThreadSafetyMode.NONE) {
             btDevice.createRfcommSocketToServiceRecord(uuid)
         }
-        private lateinit var reader: BufferedReader
+        private var reader: BufferedReader? = null
 
         init {
             currState = Constants.STATE_CONNECTING
         }
 
         override fun run() {
+            notifyActivity(Constants.STATE_CONNECTING, Constants.HANDLER_CONNECTION)
+            // connect to the device
             try {
                 btSocket?.connect()
                 currState = Constants.STATE_CONNECTED
-                notifyConnected()
+                notifyActivity(Constants.STATE_CONNECTED, Constants.HANDLER_CONNECTION)
             } catch (e: IOException) {
                 Log.e(Constants.TAG, "unable to connect to device, closing socket", e)
-                notifyStop(Constants.STATE_FAILED)
+                notifyActivity(Constants.STATE_FAILED, Constants.HANDLER_STOP)
+                close()
                 return
             }
 
             // get input stream and read in data
             val rx = btSocket?.inputStream
             reader = BufferedReader(InputStreamReader(rx!!))
+
             try {
-                reader.forEachLine {
-                    stream(it)
+                while (!currentThread().isInterrupted) {
+                    stream(reader!!.readLine())
                 }
+
+                if (interrupted()) {
+                    throw InterruptedException("thread was interrupted")
+                }
+
+            } catch (e: InterruptedException) {
+                Log.i(Constants.TAG, "connection closed", e)
+                notifyActivity(Constants.STATE_CLOSED, Constants.HANDLER_STOP)
             } catch (e: IOException) {
                 Log.e(Constants.TAG, "lost connection, closing socket", e)
-                notifyStop(Constants.STATE_LOST)
+                notifyActivity(Constants.STATE_LOST, Constants.HANDLER_STOP)
+            } finally {
+                close()
             }
+        }
+
+        private fun close() {
+            btSocket?.close()
+            reader?.close()
+        }
+
+        /**
+         * Returns the address of the connected device
+         */
+        fun getAddress(): String? {
+            return btSocket?.remoteDevice?.address
         }
 
         /**
          * Stops the thread and closes open bluetooth socket, StreamReaders
          */
         fun cancel() {
-            try {
-                btSocket?.close()
-                reader.close()
-            } catch (e: IOException) {
-                Log.e(Constants.TAG, "unable to close socket", e)
-            }
+            interrupt()
         }
     }
 }

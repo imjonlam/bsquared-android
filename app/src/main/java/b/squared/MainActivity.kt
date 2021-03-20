@@ -19,7 +19,7 @@ import kotlin.math.roundToInt
 
 class MainActivity: AppCompatActivity() {
     /* Setup */
-    private var btService: BTService? = null
+    private lateinit var btService: BTService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +27,7 @@ class MainActivity: AppCompatActivity() {
         setSupportActionBar(findViewById(R.id.tbMain))
 
         setupPermissions()
+        btService = BTService(btHandler)
     }
 
     /**
@@ -34,7 +35,7 @@ class MainActivity: AppCompatActivity() {
      */
     override fun onDestroy() {
         super.onDestroy()
-        btService?.stop()
+        btService.stop()
     }
 
     /**
@@ -104,10 +105,14 @@ class MainActivity: AppCompatActivity() {
             Constants.REQUEST_CONNECT_DEVICE -> {
                 // start connection
                 if (resultCode == Activity.RESULT_OK) {
+                    val connected = btService.getAddress()
+                    Log.i(Constants.TAG, "PREVIOUS ADDRESS $connected")
                     val address = data?.extras?.getString(Constants.MESSAGE_DEVICE_ADDRESS)
                     address?.let {
-                        btService = BTService(btHandler)
-                        btService?.start(it)
+                        if (connected.isNullOrEmpty() || connected != address) {
+                            btService.stop()
+                            btService.start(it)
+                        }
                     }
                 }
             }
@@ -121,16 +126,16 @@ class MainActivity: AppCompatActivity() {
             when(msg.what) {
                 // notify user bluetooth service has stopped
                 Constants.HANDLER_STOP -> {
-                    btService?.stop()
+                    btService.stop()
                     Toast.makeText(this@MainActivity,
                             msg.data.getString(Constants.MESSAGE_TOAST),
                             Toast.LENGTH_LONG).show()
                 }
-                // notify user bluetooth service has connected
-                Constants.HANDLER_CONNECTED -> {
+                // notify user bluetooth service is connecting/connected
+                Constants.HANDLER_CONNECTION -> {
                     Toast.makeText(this@MainActivity,
                             msg.data.getString(Constants.MESSAGE_TOAST),
-                            Toast.LENGTH_SHORT).show()
+                            Toast.LENGTH_LONG).show()
                 }
                 // stream data from Arduino
                 Constants.HANDLER_STREAM -> {
@@ -145,6 +150,17 @@ class MainActivity: AppCompatActivity() {
      * Display on screen the parsed tire temperatures
      */
     private fun displayTemps(ids: HashMap<String, Int>, temps: List<Int>) {
+        /**
+         * Removes all Constants.BAD_DATA from list, applies average.
+         * Returns result as string or "NaN" if list is empty being filtered.
+         */
+        fun cleanedAverage(lst: List<Int>): String {
+            val cleaned = lst.filter { it != Constants.BAD_DATA }
+            val count = cleaned.count()
+
+            return if (count == 0) Constants.NaN else cleaned.sum().div(count).toString()
+        }
+
         // get all required layout items
         val tireView: TextView = findViewById<TextView>(ids["tireID"]!!)
         val innerView: TextView = findViewById<TextView>(ids["innerID"]!!)
@@ -153,21 +169,25 @@ class MainActivity: AppCompatActivity() {
         val maxView: TextView = findViewById<TextView>(ids["maxID"]!!)
         val minView: TextView = findViewById<TextView>(ids["minID"]!!)
 
+        // filter out padding
+        val cleaned = temps.filter { t -> t != Constants.BAD_DATA }
+
         // set values
-        maxView.text = temps.max().toString()
-        minView.text = temps.min().toString()
-        tireView.text = temps.average().roundToInt().toString()
-        innerView.text = temps.slice(0..4).average().roundToInt().toString()
-        middleView.text = temps.slice(5..10).average().roundToInt().toString()
-        outerView.text = temps.slice(11..15).average().roundToInt().toString()
+        innerView.text = cleanedAverage(temps.slice(0..4))
+        middleView.text = cleanedAverage(temps.slice(5..10))
+        outerView.text = cleanedAverage(temps.slice(11..15))
+        maxView.text = if (cleaned.isEmpty()) Constants.NaN else cleaned.max().toString()
+        minView.text = if (cleaned.isEmpty()) Constants.NaN else cleaned.min().toString()
+        tireView.text = if (cleaned.isEmpty()) Constants.NaN else
+            cleaned.average().roundToInt().toString()
 
         // apply colours
         val gradient = temps.map { temp ->
             when(temp) {
-                in -50..69 -> Color.parseColor("#007B13")
+                in -30..69 -> Color.parseColor("#007B13")
                 in 70..99 -> Color.parseColor("#907100")
                 in 100..200 -> Color.parseColor("#FF0000")
-                else -> Color.parseColor("#000000")
+                else -> Color.parseColor("#808080")
             }
         }
 
@@ -199,7 +219,7 @@ class MainActivity: AppCompatActivity() {
                 "maxID" to R.id.tvRRMax, "minID" to R.id.tvRRMin)
 
         // convert streamed data from string to an array of integers
-        val padding = List(64){999}
+        val padding = List(64){Constants.BAD_DATA}
         val data = message.replace("^,|,$".toRegex(), "")
                 .split(",")
                 .map { it.toInt() }

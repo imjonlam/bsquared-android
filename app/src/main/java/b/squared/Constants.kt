@@ -17,6 +17,7 @@ object Constants {
     const val STATE_CONNECTED = 2
     const val STATE_FAILED = 3
     const val STATE_LOST = 4
+    const val STATE_CLOSED = 5
 
     // Bluetooth Device Attributes
     const val UUID = "00001101-0000-1000-8000-00805F9B34FB"
@@ -28,8 +29,12 @@ object Constants {
 
     // Bundles
     const val HANDLER_STOP = 0
-    const val HANDLER_CONNECTED = 1
+    const val HANDLER_CONNECTION = 1
     const val HANDLER_STREAM = 2
     const val MESSAGE_TOAST = "toast_message"
     const val MESSAGE_INCOMING = "incoming_message"
+
+    // Placeholders
+    const val BAD_DATA = 999
+    const val NaN = "NaN"
 }
