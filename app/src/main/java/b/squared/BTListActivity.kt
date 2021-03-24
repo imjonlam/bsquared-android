@@ -74,13 +74,14 @@ class BTListActivity: AppCompatActivity(), RVAdapter.OnItemClickListener {
     /**
      * Retrieve list of paired devices and add to RecyclerView
      */
-    fun showDevices() {
+    private fun showDevices() {
         // retrieve list of paired devices and add to recycler view
         val pairedDevices: Set<BluetoothDevice>? = btAdapter.bondedDevices
         pairedDevices?.forEach {
-            if (it.address in Constants.VALID_ADDRESSES) {
-                rvAdapter.addConnection(BTDevice(it.name, it.address))
-            }
+            rvAdapter.addConnection(BTDevice(it.name, it.address))
+
+//            if (it.name == Constants.VALID_DEVICE_NAME) {
+//            }
         }
     }
 }

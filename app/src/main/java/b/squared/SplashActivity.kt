@@ -7,7 +7,7 @@ import android.os.Handler
 import android.os.Looper
 
 class SplashActivity : AppCompatActivity() {
-    private val timeout: Long = 2000
+    private val timeout: Long = 1500
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

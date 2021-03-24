@@ -12,7 +12,8 @@ class RVAdapter(private val items: MutableList<BTDevice>,
     RecyclerView.Adapter<RVAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view), View.OnClickListener{
-        val textView: TextView = view.findViewById(R.id.tvDeviceName)
+        val deviceTV: TextView = view.findViewById(R.id.tvDeviceName)
+        val addressTV: TextView = view.findViewById(R.id.tvDeviceAddress)
 
         init {
             view.setOnClickListener(this)
@@ -54,7 +55,8 @@ class RVAdapter(private val items: MutableList<BTDevice>,
      * Display the name of the device in the ViewHolder
      */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.textView.text = items[position].name
+        holder.deviceTV.text = items[position].name
+        holder.addressTV.text = items[position].address
     }
 
     /**

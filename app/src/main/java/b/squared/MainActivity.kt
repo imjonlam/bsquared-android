@@ -66,7 +66,6 @@ class MainActivity: AppCompatActivity() {
 
     /**
      * Check if any required permissions were granted/denied
-     * TODO: add rejection handling
      */
     override fun onRequestPermissionsResult(requestCode: Int,
         permissions: Array<out String>, grantResults: IntArray) {
@@ -120,6 +119,8 @@ class MainActivity: AppCompatActivity() {
 
     /* Handler */
     private val btHandler = object: Handler(Looper.getMainLooper()) {
+        private var streamData = true
+
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
             when(msg.what) {
@@ -128,21 +129,46 @@ class MainActivity: AppCompatActivity() {
                     btService.stop()
                     Toast.makeText(this@MainActivity,
                             msg.data.getString(Constants.MESSAGE_TOAST),
-                            Toast.LENGTH_LONG).show()
+                            Toast.LENGTH_SHORT).show()
                 }
                 // notify user bluetooth service is connecting/connected
                 Constants.HANDLER_CONNECTION -> {
+                    streamData = true
                     Toast.makeText(this@MainActivity,
                             msg.data.getString(Constants.MESSAGE_TOAST),
-                            Toast.LENGTH_LONG).show()
+                            Toast.LENGTH_SHORT).show()
                 }
                 // stream data from Arduino
                 Constants.HANDLER_STREAM -> {
                     val stream = msg.data.getString(Constants.MESSAGE_INCOMING)
-                    stream?.let { getTemps(it) }
+                    stream?.let {
+                        if (streamData) {
+                            streamData = streamHandler(it)
+                        }
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * Streams the data to the screen.
+     * Returns true if successful.
+     * Closes the connection if results in parsing error
+     */
+    private fun streamHandler(message: String): Boolean {
+        try {
+            getTemps(message)
+        } catch (e: Exception) {
+            Log.e(Constants.TAG, "error parsing streamed data", e)
+            Toast.makeText(this@MainActivity,
+                    "Unsupported device found",
+                    Toast.LENGTH_SHORT).show()
+            btService.stop()
+            return false
+        }
+
+        return true
     }
 
     /**
@@ -161,23 +187,23 @@ class MainActivity: AppCompatActivity() {
         }
 
         // get all required layout items
-        val tireView: TextView = findViewById<TextView>(ids["tireID"]!!)
-        val innerView: TextView = findViewById<TextView>(ids["innerID"]!!)
-        val middleView: TextView = findViewById<TextView>(ids["middleID"]!!)
-        val outerView: TextView = findViewById<TextView>(ids["outerID"]!!)
-        val maxView: TextView = findViewById<TextView>(ids["maxID"]!!)
-        val minView: TextView = findViewById<TextView>(ids["minID"]!!)
+        val tireTV: TextView = findViewById<TextView>(ids["tireID"]!!)
+        val innerTV: TextView = findViewById<TextView>(ids["innerID"]!!)
+        val middleTV: TextView = findViewById<TextView>(ids["middleID"]!!)
+        val outerTV: TextView = findViewById<TextView>(ids["outerID"]!!)
+        val maxTV: TextView = findViewById<TextView>(ids["maxID"]!!)
+        val minTV: TextView = findViewById<TextView>(ids["minID"]!!)
 
         // filter out padding
         val cleaned = temps.filter { t -> t != Constants.BAD_DATA }
 
         // set values
-        innerView.text = cleanedAverage(temps.slice(0..4))
-        middleView.text = cleanedAverage(temps.slice(5..10))
-        outerView.text = cleanedAverage(temps.slice(11..15))
-        maxView.text = if (cleaned.isEmpty()) Constants.NaN else cleaned.max().toString()
-        minView.text = if (cleaned.isEmpty()) Constants.NaN else cleaned.min().toString()
-        tireView.text = if (cleaned.isEmpty()) Constants.NaN else
+        innerTV.text = cleanedAverage(temps.slice(0..4))
+        middleTV.text = cleanedAverage(temps.slice(5..10))
+        outerTV.text = cleanedAverage(temps.slice(11..15))
+        maxTV.text = if (cleaned.isEmpty()) Constants.NaN else cleaned.max().toString()
+        minTV.text = if (cleaned.isEmpty()) Constants.NaN else cleaned.min().toString()
+        tireTV.text = if (cleaned.isEmpty()) Constants.NaN else
             cleaned.average().roundToInt().toString()
 
         // apply colours
@@ -196,7 +222,7 @@ class MainActivity: AppCompatActivity() {
                 gradient.toIntArray()
         )
         gd.cornerRadius = 5f
-        tireView.background = gd
+        tireTV.background = gd
     }
 
     /**

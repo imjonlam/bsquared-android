@@ -18,10 +18,11 @@ object Constants {
     const val STATE_FAILED = 3
     const val STATE_LOST = 4
     const val STATE_CLOSED = 5
+    const val STATE_NOT_SUPPORTED = 6
 
     // Bluetooth Device Attributes
     const val UUID = "00001101-0000-1000-8000-00805F9B34FB"
-    val VALID_ADDRESSES = arrayOf("00:14:03:05:0B:A6")
+    val VALID_DEVICE_NAME = "DSD TECH HC-05"
     const val EXPECTED_LENGTH = 64
 
     // Intents

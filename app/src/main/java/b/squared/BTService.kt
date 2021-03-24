@@ -54,6 +54,7 @@ class BTService(private val btHandler: Handler) {
             Constants.STATE_FAILED -> "Unable to connect with device"
             Constants.STATE_LOST -> "Lost connection to device"
             Constants.STATE_CLOSED -> "Connection closed"
+            Constants.STATE_NOT_SUPPORTED -> "Device not supported"
             else -> "Bluetooth service has ended"
         })
 
@@ -90,7 +91,7 @@ class BTService(private val btHandler: Handler) {
             try {
                 btSocket?.connect()
                 currState = Constants.STATE_CONNECTED
-                notifyActivity(Constants.STATE_CONNECTED, Constants.HANDLER_CONNECTION)
+                //notifyActivity(Constants.STATE_CONNECTED, Constants.HANDLER_CONNECTION)
             } catch (e: IOException) {
                 Log.e(Constants.TAG, "unable to connect to device, closing socket", e)
                 notifyActivity(Constants.STATE_FAILED, Constants.HANDLER_STOP)
