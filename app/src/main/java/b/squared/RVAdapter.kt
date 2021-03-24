@@ -63,7 +63,7 @@ class RVAdapter(private val items: MutableList<BTDevice>,
      * Proposes an onclick function to each item in the list
      */
     interface OnItemClickListener {
-        fun onItemClick(device: BTDevice)
+        fun onItemClick(btDevice: BTDevice)
     }
 
 }
